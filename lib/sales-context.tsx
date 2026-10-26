@@ -13,7 +13,7 @@ export type Sale = {
   date: string
 }
 
-type SalesContextValue = { sales: Sale[]; recordSale: (sale: Omit<Sale, 'id' | 'date'>) => void }
+type SalesContextValue = { sales: Sale[]; recordSale: (sale: Omit<Sale, 'id' | 'date'>) => void; clearSales: () => void }
 const SalesContext = createContext<SalesContextValue | null>(null)
 const SALES_KEY = 'lume-sales'
 
@@ -32,6 +32,10 @@ export function SalesProvider({ children }: { children: React.ReactNode }) {
       window.localStorage.setItem(SALES_KEY, JSON.stringify(next))
       return next
     }),
+    clearSales: () => {
+      window.localStorage.removeItem(SALES_KEY)
+      setSales([])
+    },
   }), [sales])
   return <SalesContext.Provider value={value}>{children}</SalesContext.Provider>
 }

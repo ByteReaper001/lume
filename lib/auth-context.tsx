@@ -6,7 +6,7 @@ type AuthContextValue = {
   isLoggedIn: boolean
   role: 'customer' | 'photographer' | null
   email: string | null
-  login: (email: string) => void
+  loginCustomer: (email: string, password: string) => boolean
   loginPhotographer: (email: string, password: string) => boolean
   logout: () => void
 }
@@ -15,6 +15,8 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 const AUTH_KEY = 'lume-auth'
 const PHOTOGRAPHER_EMAIL = 'photographer@lume.demo'
 const PHOTOGRAPHER_PASSWORD = 'lume-artist'
+const CUSTOMER_EMAIL = 'customer@lume.demo'
+const CUSTOMER_PASSWORD = 'lume-customer'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<{ role: 'customer' | 'photographer'; email: string } | null>(null)
@@ -30,11 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoggedIn: session !== null,
     role: session?.role ?? null,
     email: session?.email ?? null,
-    login: (email: string) => {
-      if (!email.trim()) return
+    loginCustomer: (email: string, password: string) => {
+      if (email.trim().toLowerCase() !== CUSTOMER_EMAIL || password !== CUSTOMER_PASSWORD) return false
       const next = { role: 'customer' as const, email: email.trim() }
       window.localStorage.setItem(AUTH_KEY, JSON.stringify(next))
       setSession(next)
+      return true
     },
     loginPhotographer: (email: string, password: string) => {
       if (email.trim().toLowerCase() !== PHOTOGRAPHER_EMAIL || password !== PHOTOGRAPHER_PASSWORD) return false
