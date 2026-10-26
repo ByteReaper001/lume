@@ -10,7 +10,14 @@ Catalog:
 ${products.map((product) => `- ${product.title} by ${product.photographer}; category: ${product.category}; price: ${product.price}; tags: ${product.tags.join(', ')}; description: ${product.description}`).join('\n')}`
 
 export async function POST(request: Request) {
-  const apiKey = process.env.LumeAI
+  // Support the project setting name as well as conventional aliases used by Groq.
+  // The key remains server-only and is never exposed to the browser.
+  const apiKey = (
+    process.env.LumeAI ||
+    process.env.LUME_AI ||
+    process.env.LUMEAI ||
+    process.env.GROQ_API_KEY
+  )?.trim()
 
   if (!apiKey) {
     return NextResponse.json({ error: 'Lume AI is not configured.' }, { status: 503 })
