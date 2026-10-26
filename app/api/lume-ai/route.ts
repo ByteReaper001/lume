@@ -10,8 +10,6 @@ Catalog:
 ${products.map((product) => `- ${product.title} by ${product.photographer}; category: ${product.category}; price: ${product.price}; tags: ${product.tags.join(', ')}; description: ${product.description}`).join('\n')}`
 
 export async function POST(request: Request) {
-  // Support the project setting name as well as conventional aliases used by Groq.
-  // The key remains server-only and is never exposed to the browser.
   const groqKey = (
     process.env.LumeAI_KEY ||
     process.env.LumeAI ||
@@ -42,15 +40,17 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-        model: groqKey ? 'llama-3.3-70b-versatile' : 'openai/gpt-4o-mini',
-        temperature: 0.75,
-        max_tokens: 220,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message },
-        ],
-      }),
-    })
+          model: groqKey ? 'openai/gpt-oss-120b' : 'openai/gpt-4o-mini',
+          temperature: 0.75,
+          max_tokens: 220,
+          ...(groqKey ? { reasoning_effort: 'low' } : {}),
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message },
+          ],
+        }),
+      },
+    )
 
     if (!response.ok) {
       return NextResponse.json({ error: 'Lume AI could not respond right now.' }, { status: 502 })
