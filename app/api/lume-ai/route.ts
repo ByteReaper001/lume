@@ -12,14 +12,15 @@ ${products.map((product) => `- ${product.title} by ${product.photographer}; cate
 export async function POST(request: Request) {
   // Support the project setting name as well as conventional aliases used by Groq.
   // The key remains server-only and is never exposed to the browser.
-  const apiKey = (
+  const groqKey = (
     process.env.LumeAI ||
     process.env.LUME_AI ||
     process.env.LUMEAI ||
     process.env.GROQ_API_KEY
   )?.trim()
+  const gatewayKey = process.env.AI_GATEWAY_API_KEY?.trim()
 
-  if (!apiKey) {
+  if (!groqKey && !gatewayKey) {
     return NextResponse.json({ error: 'Lume AI is not configured.' }, { status: 503 })
   }
 
@@ -31,14 +32,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Please send a question under 1000 characters.' }, { status: 400 })
     }
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+    const response = await fetch(
+      groqKey ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://ai-gateway.vercel.sh/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${groqKey || gatewayKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+        model: groqKey ? 'llama-3.3-70b-versatile' : 'openai/gpt-4o-mini',
         temperature: 0.75,
         max_tokens: 220,
         messages: [
