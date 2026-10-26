@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { CartProvider } from '@/lib/cart-context'
 import { AuthProvider } from '@/lib/auth-context'
+import { SalesProvider } from '@/lib/sales-context'
 
 export const metadata: Metadata = {
   title: 'LUME — Photography, collected.',
@@ -12,5 +13,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { colorScheme: 'light', themeColor: '#f7f5f0' }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body className="antialiased"><AuthProvider><CartProvider>{children}</CartProvider></AuthProvider>{process.env.NODE_ENV === 'production' && <Analytics />}</body></html>
+  return <html lang="en"><body className="antialiased"><AuthProvider><SalesProvider><CartProvider>{children}</CartProvider></SalesProvider></AuthProvider>{process.env.NODE_ENV === 'production' && <Analytics />}</body></html>
 }

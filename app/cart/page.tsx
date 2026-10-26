@@ -7,10 +7,12 @@ import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Check } from 'lucide-reac
 import { formatINR } from '@/lib/data'
 import { useCart } from '@/lib/cart-context'
 import { useAuth } from '@/lib/auth-context'
+import { useSales } from '@/lib/sales-context'
 
 export default function CartPage() {
   const { lines, count, update, remove, clear, getProduct } = useCart()
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, email } = useAuth()
+  const { recordSale } = useSales()
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [paid, setPaid] = useState(false)
@@ -25,6 +27,9 @@ export default function CartPage() {
     setShowLoginPrompt(false)
     setIsPaying(true)
     window.setTimeout(() => {
+      items.forEach(({ product, quantity }) => {
+        if (product) recordSale({ productId: product.id, title: product.title, photographer: product.photographer, quantity, total: product.price * quantity, buyerEmail: email ?? 'customer@lume.demo' })
+      })
       clear()
       setIsPaying(false)
       setPaid(true)
